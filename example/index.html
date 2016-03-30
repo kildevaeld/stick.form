@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="../node_modules/babel-polyfill/dist/polyfill.js"></script>
+        <script src="../node_modules/stick/build/stick.js"></script>
+        <script src="../dist/stick.form.js"></script>
+        <script type="text/html" id="main">
+            <form>
+                <field class="field">
+                    <label>Name</label>
+                    <input type="text" name="name" value="{{<~>name}}" required />
+                </field>
+                <field class="field">
+                    <label>Age</label>
+                    <input type="number" name="age" value="{{<~>age}}"  min="10" />
+                </field>
+                <field class="field">
+                    <label>Age</label>
+                    <input  name="bjorn" value="{{<~>bjorn}}" email  />
+                </field>
+            </form>
+        </script>
+        <script>
+            'use strict';
+            
+            let app = stick.module('app', {});
+            
+            stick.ready(function () {
+                app.create({
+                    el: document.querySelector('body'),
+                    template: 'main',
+                    model: {
+                        name: 'Hello'
+                    }
+                });
+            });
+            
+        </script>
+    </head>
+    <body>
+        
+       
+        
+    </body>    
+</html>

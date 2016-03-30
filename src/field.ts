@@ -2,15 +2,15 @@
 import {Base, BaseTemplate} from './base';
 import {Editor} from './editor';
 import {utils, template} from 'stick';
-import {validate} from './validator';
+import {validate, getValue} from './validator';
 import {Form} from './form';
 
-export abstract class Field<T, U> extends BaseTemplate<HTMLDivElement> {
-    tagName = "DIV";
+export abstract class Field extends BaseTemplate<HTMLDivElement> {
+    //tagName = "DIV";
     get editor(): HTMLElement {
         let el = <HTMLElement>this.el.querySelector('[name]');
         let fields = this.subview.bindings.filter( b => b instanceof Editor);
-        let field = utils.find<Field<any,any>>(fields, (i) => i.el === el)
+        let field = utils.find<Editor>(fields, (i) => i.el === el)
         
         return el;
     } 
@@ -19,11 +19,24 @@ export abstract class Field<T, U> extends BaseTemplate<HTMLDivElement> {
         return this.editor.getAttribute('name');
     }
     
+    get value(): any {
+        let el = <HTMLElement>this.el.querySelector('[name]');
+        let fields = this.subview.bindings.filter( b => b instanceof Editor);
+        let field = utils.find<Editor>(fields, (i) => i.el === el)
+        
+        if (field) {
+            return field.value;
+        } else {
+            return getValue(el);
+        }
+        
+    }
+    
     valid: boolean = true;
     
     
     initialize () {
-        
+           
         this.el = document.createElement('div');
 
         for (let a in utils.omit(this.attributes, [])) {
@@ -52,19 +65,19 @@ export abstract class Field<T, U> extends BaseTemplate<HTMLDivElement> {
     validate (form:Form) {
         let el = <HTMLElement>this.el.querySelector('[name]');
         let fields = this.subview.bindings.filter( b => b instanceof Editor);
-        let field = utils.find<Editor<any>>(fields, (i) => i.el === el)
-        
+        let field = utils.find<Editor>(fields, (i) => i.el === el)
+       
         
         let errors;
         if (field) {
-            errors = field.validate();
+            errors = field.validate(form, this);
         } else {
-            errors = validate(el);
+            errors = validate(form, this, el);
         }
         
         this.setErrors(errors);
         
-        
+        return errors.length === 0;
     }
 
     setErrors (errors:Error[]) {
@@ -72,13 +85,14 @@ export abstract class Field<T, U> extends BaseTemplate<HTMLDivElement> {
         el.removeClass('has-success has-error');
         
         let help = el.find('.help-block');
-        
+        help.html('');
         if (errors.length === 0) {
             el.addClass('has-success');
-            help.html('');    
+            
             this.valid = true;
         } else {
-            el.addClass('has-error');
+            el.addClass('has-error')
+            
             
             let s = errors.map( e => e.message);
             

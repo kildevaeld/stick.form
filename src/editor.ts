@@ -5,21 +5,21 @@ import {validate, ValidateError} from './validator'
 import {Form} from './form';
 import {Field} from './field';
 
-export abstract class Editor<T> extends Base {
+export abstract class Editor extends Base {
 
     el: HTMLElement;
     tagName: string;
 
-    get value(): T {
+    get value(): any {
         return this.getValue();
     }
 
-    set value(value: T) {
+    set value(value: any) {
         this.setValue(value);
     }
 
-    abstract getValue(): T;
-    abstract setValue(value: T);
+    abstract getValue(): any;
+    abstract setValue(value: any);
 
     update() { }
 
@@ -38,8 +38,8 @@ export abstract class Editor<T> extends Base {
         }
     }
     
-    validate (form:Form, field: Field<any,any>): ValidateError[] {
-        return this.el != null ? validate(this.el): [];
+    validate (form:Form, field: Field): ValidateError[] {
+        return this.el != null ? validate(form, field, this.el): [];
     }
 
 }

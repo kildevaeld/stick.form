@@ -1,11 +1,17 @@
+declare const require:any;
 import {template} from './template';
+import {Field} from './field';
+import {Form} from './form';
+import {utils} from 'stick';
+
+const validURL = require('valid-url');
 
 function get_validations(el: HTMLElement) {
     var required;
 
     let v = Object.keys(validators).map(e => {
         let i = el.getAttribute(e);
-        if (i) return validators[e];
+        if (i) return [validators[e], i, e];
         return null;
     }).filter(e => e !== null);
 
@@ -13,15 +19,77 @@ function get_validations(el: HTMLElement) {
 
 }
 
-export function validate(el: HTMLElement) {
+export function getValue(el: HTMLElement, value?: any): any {
+    var node = <HTMLInputElement>el;
+    var isCheckbox = /checkbox/.test(node.type);
+    var isRadio = /radio/.test(node.type);
+
+    var isRadioOrCheckbox = isCheckbox || isRadio;
+    var hasValue = Object.prototype.hasOwnProperty.call(node, "value");
+    var isInput = hasValue || /input|textarea|checkbox/.test(node.nodeName.toLowerCase());
+    var isSelect = /select/i.test(node.nodeName)
+
+    if (arguments.length === 1) {
+        if (isCheckbox) {
+            return Boolean(node.checked);
+        } else if (isSelect) {
+            return node.value || "";
+        } else if (isInput) {
+            let value = node.value || "";
+            if (node.type.toLowerCase() === 'number') {
+                value = <any>parseInt(value)
+                value = <any>(isNaN(<any>value) ? 0 : value)
+            }
+            return value;
+
+        } else {
+            return node.innerHTML || "";
+        }
+    }
+
+    if (value == null) {
+        value = "";
+    }
+
+    if (isRadioOrCheckbox) {
+        if (isRadio) {
+            if (String(value) === String(node.value)) {
+                node.checked = true;
+            }
+        } else {
+            node.checked = value;
+        }
+    } else if (String(value) !== getValue(el)) {
+
+        if (isInput || isSelect) {
+            node.value = value;
+        } else {
+            node.innerHTML = value;
+        }
+    }
+}
+
+export function setValue(el:HTMLElement, value:any) {
+    getValue(el, value);
+}
+
+export function validate(form: Form, field: Field, el: HTMLElement) {
 
     let v = get_validations(el);
     let name = el.getAttribute('name');
+
+
+    let value = getValue(el);
+
     let errors = [];
     for (let i = 0, ii = v.length; i < ii; i++) {
-        try {
-            v[i](name, el);
-        } catch (e) {
+        if (!v[i][0](name, form, value, v[i][1])) {
+            let vName = v[i][2];
+            let e = new ValidateError(template(messages[vName], {
+                name: name,
+                value: value,
+                arg: v[i][1]
+            }));
             errors.push(e);
         }
     }
@@ -30,59 +98,60 @@ export function validate(el: HTMLElement) {
 }
 
 module messages {
-    export const required = "<b>{{ name }}</b> is required";
-    export const min = "<b>{{ name }}</b> needs to be minimum {{ min }} long";
-    
-    export const email = "<b>{{ name }}</b> is not an email";
+    export const required = "<b><% name %></b> is required";
+    export const min = "<b><% name %></b> needs to be minimum <% arg %> long";
+
+    export const email = "<b><% name %></b> is not an email";
+    export const url = "<b><% name %></b> is not an url";
+    export const match = "<b><% name %></b> does not match: <b><%arg%></b>"
 }
 
 export module validators {
-    export function required(name: string, el: HTMLElement) {
-        let value;
-        if (el instanceof HTMLInputElement) {
-            value = el.value;
-        }
-
-
-        if (value == "" || value == null) throw new ValidateError(template(messages.required, { name: name }));
+    export function required(name: string, form: Form, value: any, arg: any) {
+        return !(value == "" || value == null)
     }
 
-    export function min(name: string, el: HTMLElement) {
-        let value;
-        let type = "s";
-        if (el instanceof HTMLInputElement) {
-            value = el.value;
-            if (el.type === 'number') {
-                type = "n";
-            }
-        }
-        let mins = el.getAttribute('min');
-        if (!mins) return;
+    export function min(name: string, form: Form, value: any, arg: any) {
 
-        let min = parseInt(mins);
+        let min = parseInt(arg);
+
         // TODO: check in init
         if (isNaN(min)) return;
 
-        let e = new ValidateError(template(messages.min, { name: name, min: min }));
-        if (type === 's') {
-            if (value.length >= min) e = null;
-        } else if (type === 'n') {
-            if (value >= min) e = null;
+        if (typeof value === 'string') {
+            return value.length >= min;
+        } else {
+
+            return value >= min;
         }
 
-        if (e) throw e;
+    }
+
+    export function match(name: string, form: Form, value: any, arg: any) {
+
+        let field = form.getFieldForName(arg);
+
+        if (!field) {
+            throw new Error(`field: ${arg} does not exists`);
+        }
+
+        let oval = field.value;
+
+        return utils.equal(value, oval);
+
+    }
+    
+    export function url(name: string, form: Form, value: any, arg: any) {
+        return validURL.isUri(value);
     }
 
     const tester = /^[-!#$%&'*+\/0-9=?A-Z^_a-z{|}~](\.?[-!#$%&'*+\/0-9=?A-Z^_a-z`{|}~])*@[a-zA-Z0-9](-?\.?[a-zA-Z0-9])*\.[a-zA-Z](-?[a-zA-Z0-9])+$/;
-    
-    export function email(name: string, el: HTMLElement) {
-        
-        let valid = validate_email((<any>el).value);
-        
-        if (!valid) {
-            throw new ValidateError(template(messages.email, {name: name}))
-        }
-        
+
+    export function email(name: string, form: Form, value: any, arg: any) {
+
+        return validate_email(value);
+
+
         // Thanks to:
         // http://fightingforalostcause.net/misc/2006/compare-email-regex.php
         // http://thedailywtf.com/Articles/Validating_Email_Addresses.aspx
@@ -117,7 +186,7 @@ export function setMessage(validator: string, message: string) {
     messages[validator] = message;
 }
 
-export function registerValidator(name: string, fn: (name: string, el: HTMLElement) => void) {
+export function registerValidator(name: string, fn: (name: string, form: Form, value: any, arg: any) => boolean) {
     validators[name] = fn;
 }
 

@@ -1,10 +1,12 @@
 
 import {Editor} from './editor';
 import {utils} from 'stick'
-export class Input extends Editor<string> {
+import {getValue, setValue} from './validator';
+export class Input extends Editor {
     nodeName = "INPUT"
     
     initialize () {
+        
         let input = document.createElement('input');
         this.section.appendChild(input);
         this.el = input;
@@ -14,11 +16,12 @@ export class Input extends Editor<string> {
         
     }
     getValue(): string {
-        return this.el.value;
+        return getValue(this.el);
         
     }
     
+    
     setValue(value:string) {
-        this.el.value = value;
+        setValue(this.el, value);
     }
 }

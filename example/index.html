@@ -5,10 +5,10 @@
         <script src="../node_modules/stick/build/stick.js"></script>
         <script src="../dist/stick.form.js"></script>
         <script type="text/html" id="main">
-            <form>
+            <form name="form">
                 <field class="field">
                     <label>Name</label>
-                    <input type="text" name="name" value="{{<~>name}}" required />
+                    <input type="text" name="name" value="{{<~>name}}" required min="10"  />
                 </field>
                 <field class="field">
                     <label>Age</label>
@@ -16,14 +16,25 @@
                 </field>
                 <field class="field">
                     <label>Age</label>
-                    <input  name="bjorn" value="{{<~>bjorn}}" email  />
+                    <input  name="bjorn" value="{{<~>new_name}}" match="name" required  />
+                </field>
+                <field class="field">
+                    <label>Url</label>
+                    <input  name="url" value="{{<~>url}}" url required  />
                 </field>
             </form>
         </script>
         <script>
             'use strict';
-            
-            let app = stick.module('app', {});
+            console.log(stick)
+            let app = stick.module('app', ['$state', function ($state) {
+                $state.set('name', 'Peter');
+                setTimeout(() => {
+                    let val = $state.get('$ui.form').getValue()
+                console.log('name', val)    
+                })
+                
+            }]);
             
             stick.ready(function () {
                 app.create({

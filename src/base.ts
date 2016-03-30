@@ -4,6 +4,7 @@ import {template} from 'stick';
 
 export abstract class Base extends template.BaseComponent {
     
+    
      destroy () {
         this.stopListening();
         super.destroy();

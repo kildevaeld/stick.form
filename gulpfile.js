@@ -3,18 +3,23 @@
 const gulp = require('gulp'),
     tsc = require('gulp-typescript'),
     babel = require('gulp-babel'),
-    webpack = require('gulp-webpack');
+    webpack = require('gulp-webpack'),
+    merge = require('merge2');
 
 
 const project = tsc.createProject('./tsconfig.json');
 gulp.task('typescript', () => {
-    return project.src()
+    let result = project.src()
     .pipe(tsc(project))
+    
+    let js = result.js
     .pipe(babel({
         presets: ['es2015']
-    }))
-    .pipe(gulp.dest('lib'));
+    })).pipe(gulp.dest('lib'));
     
+    let dts = result.dts.pipe(gulp.dest('lib'));
+    
+    return merge([js,dts]);
     
 })    
 

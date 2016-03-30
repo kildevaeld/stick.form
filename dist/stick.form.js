@@ -66,6 +66,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	__export(__webpack_require__(9));
 	var validator_1 = __webpack_require__(4);
 	exports.registerValidator = validator_1.registerValidator;
+	exports.setMessage = validator_1.setMessage;
 	var stick = __webpack_require__(3);
 	var form_2 = __webpack_require__(9);
 	var field_2 = __webpack_require__(8);
@@ -850,12 +851,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var target = e.delegateTarget;
 	            var field = this.getFieldForElement(target);
 	            if (field == null) return;
+	            this.triggerMethod('change', field);
 	            field.validate(this);
 	            this.valid = this.fields.filter(function (e) {
 	                return !e.valid;
 	            }).length === 0;
+	            if (!this.valid) {
+	                this.triggerMethod('invalid', field);
+	            } else {
+	                this.triggerMethod('valid', field);
+	            }
 	            var $el = stick_1.utils.Html.query(this.el).removeClass('valid invalid');
 	            if (this.valid) $el.addClass('valid');else $el.addClass('invalid');
+	        }
+	    }, {
+	        key: 'triggerMethod',
+	        value: function triggerMethod(event) {
+	            for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+	                args[_key2 - 1] = arguments[_key2];
+	            }
+
+	            this.trigger.apply(this, [event, this].concat(args));
+	            var cb = this.attributes['on' + event];
+	            if (!cb) return;
+	            if (cb instanceof stick_1.template.Assignment) {
+	                cb.assign();
+	            } else if (cb instanceof stick_1.template.Call) {
+	                cb.call();
+	            } else if (typeof cb === 'function') {
+	                cb.apply(undefined, args);
+	            }
 	        }
 	    }, {
 	        key: 'update',

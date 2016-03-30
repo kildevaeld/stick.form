@@ -77,13 +77,38 @@ export class Form extends BaseTemplate<HTMLFormElement> {
         
         if (field == null) return;
         
+        this.triggerMethod('change', field);
+        
         field.validate(this);
       
-        this.valid = this.fields.filter( e => !e.valid ).length === 0;  
+        this.valid = this.fields.filter( e => !e.valid ).length === 0;
+        
+        if (!this.valid) {
+            this.triggerMethod('invalid', field);
+        } else {
+            this.triggerMethod('valid', field);
+        }
         
         let $el = utils.Html.query(this.el).removeClass('valid invalid');
         if (this.valid) $el.addClass('valid');
         else $el.addClass('invalid');
+        
+    }
+    
+    triggerMethod (event: string, ...args:any[]) {
+        this.trigger(event, this, ...args);
+        
+        let cb = <any>this.attributes['on' + event];
+        
+        if (!cb) return;
+        
+         if (cb instanceof template.Assignment) {
+            cb.assign();
+        } else if (cb instanceof template.Call) {
+            cb.call();
+        } else if (typeof cb === 'function') {
+            cb(...args);
+        }
         
     }
     

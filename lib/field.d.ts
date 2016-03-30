@@ -7,6 +7,6 @@ export declare abstract class Field extends BaseTemplate<HTMLDivElement> {
     valid: boolean;
     initialize(): void;
     update(): void;
-    validate(form: Form): boolean;
+    validate(form: Form): any;
     setErrors(errors: Error[]): void;
 }

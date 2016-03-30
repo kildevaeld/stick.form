@@ -4,6 +4,7 @@ import {Editor} from './editor';
 import {utils, template} from 'stick';
 import {validate, getValue} from './validator';
 import {Form} from './form';
+import * as templ from './template';
 
 export abstract class Field extends BaseTemplate<HTMLDivElement> {
     //tagName = "DIV";
@@ -49,13 +50,14 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
             parent: this.view
         });
         
-        
 
         this.el.appendChild(this.subview.render());
         
         let errorField = document.createElement('div');
         utils.addClass(errorField, "help-block")
-        this.el.appendChild(errorField);
+        
+        this.editor.parentNode.appendChild(errorField);
+       
 
     }
    
@@ -77,7 +79,7 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
         
         this.setErrors(errors);
         
-        return errors.length === 0;
+        return errors;
     }
 
     setErrors (errors:Error[]) {
@@ -93,8 +95,17 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
         } else {
             el.addClass('has-error')
             
-            
-            let s = errors.map( e => e.message);
+            let eStr = this.editor.getAttribute('error');
+            let s: string[];
+            if (eStr) {
+                let str = templ.template(eStr, {
+                    name: this.name,
+                    value: this.value 
+                });
+                s = [str];
+            } else {
+                s = errors.map( e => e.message);    
+            }
             
             if (s.length > 1) {
                 let ul = document.createElement('ul');

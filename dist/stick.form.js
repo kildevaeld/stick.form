@@ -625,6 +625,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var editor_1 = __webpack_require__(1);
 	var stick_1 = __webpack_require__(3);
 	var validator_1 = __webpack_require__(4);
+	var templ = __webpack_require__(5);
 
 	var Field = function (_base_1$BaseTemplate) {
 	    _inherits(Field, _base_1$BaseTemplate);
@@ -660,7 +661,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.el.appendChild(this.subview.render());
 	            var errorField = document.createElement('div');
 	            stick_1.utils.addClass(errorField, "help-block");
-	            this.el.appendChild(errorField);
+	            this.editor.parentNode.appendChild(errorField);
 	        }
 	    }, {
 	        key: 'update',
@@ -682,7 +683,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                errors = validator_1.validate(form, this, el);
 	            }
 	            this.setErrors(errors);
-	            return errors.length === 0;
+	            return errors;
 	        }
 	    }, {
 	        key: 'setErrors',
@@ -696,9 +697,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.valid = true;
 	            } else {
 	                el.addClass('has-error');
-	                var s = errors.map(function (e) {
-	                    return e.message;
-	                });
+	                var eStr = this.editor.getAttribute('error');
+	                var s = void 0;
+	                if (eStr) {
+	                    var str = templ.template(eStr, {
+	                        name: this.name,
+	                        value: this.value
+	                    });
+	                    s = [str];
+	                } else {
+	                    s = errors.map(function (e) {
+	                        return e.message;
+	                    });
+	                }
 	                if (s.length > 1) {
 	                    var ul = document.createElement('ul');
 	                    help.get(0).appendChild(ul);
@@ -830,10 +841,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'validate',
 	        value: function validate() {
 	            var fields = this.fields;
+	            var errors = [];
 	            for (var i = 0, ii = fields.length; i < ii; i++) {
-	                if (!fields[i].validate(this)) return false;
+	                var e = fields[i].validate(this);
+	                if (e.length > 0) errors.push(e);
 	            }
-	            return true;
+	            this.valid = errors.length === 0;
+	            if (this.valid) {
+	                this.triggerMethod('valid');
+	            } else {
+	                this.triggerMethod('invalid');
+	            }
+	            return errors;
 	        }
 	    }, {
 	        key: 'getValue',

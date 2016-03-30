@@ -55,10 +55,22 @@ export class Form extends BaseTemplate<HTMLFormElement> {
     
     validate () {
         let fields = this.fields;
+        let errors = [];
         for (let i = 0, ii = fields.length; i < ii; i++ ) {
-            if (!fields[i].validate(this)) return false;
+            let e = fields[i].validate(this);
+            if (e.length > 0) errors.push(e);
+            
         }
-        return true;
+        
+        this.valid = errors.length === 0;
+        
+        if (this.valid) {
+            this.triggerMethod('valid');
+        } else {
+            this.triggerMethod('invalid');
+        }
+        
+        return errors;
     }
     
     getValue():any {

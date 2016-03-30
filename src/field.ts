@@ -2,7 +2,7 @@
 import {Base, BaseTemplate} from './base';
 import {Editor} from './editor';
 import {utils, template} from 'stick';
-import {validate, getValue} from './validator';
+import {validate, getValue, setValue} from './validator';
 import {Form} from './form';
 import * as templ from './template';
 
@@ -33,6 +33,18 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
         
     }
     
+    set value(value:any) {
+        let el = <HTMLElement>this.el.querySelector('[name]');
+        let fields = this.subview.bindings.filter( b => b instanceof Editor);
+        let field = utils.find<Editor>(fields, (i) => i.el === el)
+        
+        if (field) {
+            field.value = value;
+        } else {
+            setValue(el, value);
+        }
+    }
+    
     valid: boolean = true;
     
     
@@ -59,6 +71,10 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
         this.editor.parentNode.appendChild(errorField);
        
 
+    }
+    
+    clear () {
+        this.value = null;
     }
    
     update () {}

@@ -1,8 +1,8 @@
 
 import {template} from 'stick';
+import {BaseComponent, TemplateView} from 'stick/lib/template';
 
-
-export abstract class Base extends template.BaseComponent {
+export abstract class Base extends BaseComponent {
     
     
      destroy () {
@@ -12,7 +12,7 @@ export abstract class Base extends template.BaseComponent {
 }
 
 export abstract class BaseTemplate<T extends HTMLElement> extends Base {
-    subview: template.TemplateView;
+    subview: TemplateView;
     el: T;
     tagName:string;
 }

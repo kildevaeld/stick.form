@@ -1,7 +1,8 @@
 
 import {Base, BaseTemplate} from './base';
 import {Editor} from './editor';
-import {utils, template} from 'stick';
+import {utils} from 'stick';
+import {TemplateView} from 'stick/lib/template';
 import {validate, getValue, setValue} from './validator';
 import {Form} from './form';
 import * as templ from './template';
@@ -11,7 +12,7 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
     get editor(): HTMLElement {
         let el = <HTMLElement>this.el.querySelector('[name]');
         let fields = this.subview.bindings.filter( b => b instanceof Editor);
-        let field = utils.find<Editor>(fields, (i) => i.el === el)
+        let field = utils.find<Editor>(<any>fields, (i) => i.el === el)
         
         return el;
     } 
@@ -23,7 +24,7 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
     get value(): any {
         let el = <HTMLElement>this.el.querySelector('[name]');
         let fields = this.subview.bindings.filter( b => b instanceof Editor);
-        let field = utils.find<Editor>(fields, (i) => i.el === el)
+        let field = utils.find<Editor>(<any>fields, (i) => i.el === el)
         
         if (field) {
             return field.value;
@@ -36,7 +37,7 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
     set value(value:any) {
         let el = <HTMLElement>this.el.querySelector('[name]');
         let fields = this.subview.bindings.filter( b => b instanceof Editor);
-        let field = utils.find<Editor>(fields, (i) => i.el === el)
+        let field = utils.find<Editor>(<any>fields, (i) => i.el === el)
         
         if (field) {
             field.value = value;
@@ -58,7 +59,7 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
 
         this.section.appendChild(this.el);
 
-        this.subview = <template.TemplateView>this.childTemplate.view(this.view.context, {
+        this.subview = <TemplateView>this.childTemplate.view(this.view.context, {
             parent: this.view
         });
         
@@ -83,7 +84,7 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
     validate (form:Form) {
         let el = <HTMLElement>this.el.querySelector('[name]');
         let fields = this.subview.bindings.filter( b => b instanceof Editor);
-        let field = utils.find<Editor>(fields, (i) => i.el === el)
+        let field = utils.find<Editor>(<any>fields, (i) => i.el === el)
        
         
         let errors;

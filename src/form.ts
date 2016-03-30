@@ -1,7 +1,7 @@
 import {BaseTemplate} from './base';
-import {utils, template} from 'stick';
+import {utils} from 'stick';
 import {Field} from './field';
-
+import {TemplateView, Assignment, Call} from 'stick/lib/template';
 
 
 export class Form extends BaseTemplate<HTMLFormElement> {
@@ -11,7 +11,7 @@ export class Form extends BaseTemplate<HTMLFormElement> {
     valid: boolean = true;
     
     get fields (): Field[] {
-        return this.subview.bindings.filter( b => b instanceof Field);   
+        return <any>this.subview.bindings.filter( b => b instanceof Field);   
     }
     
     getFieldForElement (el:HTMLElement): Field {
@@ -40,7 +40,7 @@ export class Form extends BaseTemplate<HTMLFormElement> {
 
         this.section.appendChild(this.el);
 
-        this.subview = <template.TemplateView>this.childTemplate.view(this.view.context, {
+        this.subview = <TemplateView>this.childTemplate.view(this.view.context, {
             parent: this.view
         });
 
@@ -114,9 +114,9 @@ export class Form extends BaseTemplate<HTMLFormElement> {
         
         if (!cb) return;
         
-         if (cb instanceof template.Assignment) {
+         if (cb instanceof Assignment) {
             cb.assign();
-        } else if (cb instanceof template.Call) {
+        } else if (cb instanceof Call) {
             cb.call();
         } else if (typeof cb === 'function') {
             cb(...args);

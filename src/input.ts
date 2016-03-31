@@ -27,7 +27,6 @@ export class Input extends Editor {
     }
     
     setHelpBlock (html:HTMLDivElement) {
-        console.log('HELP BLOCK')
        if (this.el.parentNode) {
            this.el.parentNode.appendChild(html);
        }

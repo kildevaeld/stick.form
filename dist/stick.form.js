@@ -67,13 +67,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	var validator_1 = __webpack_require__(84);
 	exports.registerValidator = validator_1.registerValidator;
 	exports.setMessage = validator_1.setMessage;
+	exports.ValidateError = validator_1.ValidateError;
 	var stick = __webpack_require__(83);
 	var form_2 = __webpack_require__(89);
 	var field_2 = __webpack_require__(88);
-	var input_1 = __webpack_require__(90);
 	stick.component('form', form_2.Form);
 	stick.component('field', field_2.Field);
-	stick.component('input', input_1.Input);
+	//stick.component('input', Input);
 
 /***/ },
 /* 1 */
@@ -14462,6 +14462,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -14488,15 +14490,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var _this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Field)).call.apply(_Object$getPrototypeO, [this].concat(args)));
 
+	        _this.nodeName = "DIV";
 	        _this.valid = true;
 	        return _this;
 	    }
-	    //tagName = "DIV";
-
 
 	    _createClass(Field, [{
 	        key: 'initialize',
 	        value: function initialize() {
+	            this._onElementChange = stick_1.utils.bind(this._onElementChange, this);
 	            this.el = document.createElement('div');
 	            for (var a in stick_1.utils.omit(this.attributes, [])) {
 	                this.el.setAttribute(a, this.attributes[a]);
@@ -14506,9 +14508,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	                parent: this.view
 	            });
 	            this.el.appendChild(this.subview.render());
-	            var errorField = document.createElement('div');
-	            stick_1.utils.addClass(errorField, "help-block");
-	            this.editor.parentNode.appendChild(errorField);
+	            this.errorField = document.createElement('div');
+	            stick_1.utils.addClass(this.errorField, "help-block");
+	            this.editor.parentNode.appendChild(this.errorField);
+	            /*let elList = <NodeListOf<HTMLElement>>this.el.querySelectorAll('[name]');
+	            
+	            if (!elList || elList.length > 1) {
+	                throw new Error('field with no input or more than one');
+	            }
+	            let el = elList[0];
+	            
+	            utils.addEventListener('change', )*/
+	            var el = this.el.querySelector('[name]');
+	            var fields = this.subview.bindings.filter(function (b) {
+	                return b instanceof editor_1.Editor;
+	            });
+	            var field = stick_1.utils.find(fields, function (i) {
+	                return i.el === el;
+	            });
+	            if (field) {
+	                field.addEventListener('change', this._onElementChange);
+	            } else {
+	                stick_1.utils.addEventListener(el, 'change', this._onElementChange);
+	            }
 	        }
 	    }, {
 	        key: 'clear',
@@ -14542,7 +14564,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function setErrors(errors) {
 	            var el = stick_1.utils.Html.query(this.el);
 	            el.removeClass('has-success has-error');
-	            var help = el.find('.help-block');
+	            var help = stick_1.utils.Html.query(this.errorField);
 	            help.html('');
 	            if (errors.length === 0) {
 	                el.addClass('has-success');
@@ -14573,6 +14595,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	                help.html(s.join(''));
 	                this.valid = false;
 	            }
+	        }
+	    }, {
+	        key: '_onElementChange',
+	        value: function _onElementChange(e) {
+	            this.trigger('change', this);
+	        }
+	    }, {
+	        key: 'destroy',
+	        value: function destroy() {
+	            if (this.el) {
+	                stick_1.utils.removeEventListener(this.el, 'change', this._onElementChange);
+	            }
+	            _get(Object.getPrototypeOf(Field.prototype), 'destroy', this).call(this);
 	        }
 	    }, {
 	        key: 'editor',
@@ -14686,6 +14721,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'initialize',
 	        value: function initialize() {
+	            var _this2 = this;
+
 	            this.el = document.createElement('form');
 	            this.onFormChange = this.onFormChange.bind(this);
 	            for (var a in stick_1.utils.omit(this.attributes, [])) {
@@ -14700,8 +14737,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                parent: this.view
 	            });
 	            this.el.appendChild(this.subview.render());
-	            var fields = this.el.querySelectorAll('[name]');
-	            stick_1.utils.delegate(this.el, '[name]', 'change', this.onFormChange, this);
+	            //let fields = this.el.querySelectorAll('[name]');
+	            var fields = this.fields;
+	            fields.forEach(function (e) {
+	                _this2.listenTo(e, 'change', _this2.onFormChange);
+	            });
+	            //utils.delegate(this.el, '[name]', 'change', this.onFormChange, this);
 	            this.listenTo(this.subview.context, 'change', this.onContextChange);
 	        }
 	    }, {
@@ -14731,13 +14772,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            return out;
 	        }
+	        /*onFormChange (e) {
+	            let target = e.delegateTarget;
+	            
+	            let field = this.getFieldForElement(target);
+	            
+	            if (field == null) return;
+	            
+	            this.triggerMethod('change', field);
+	            
+	            field.validate(this);
+	          
+	            this.valid = this.fields.filter( e => !e.valid ).length === 0;
+	            
+	            if (!this.valid) {
+	                this.triggerMethod('invalid', field);
+	            } else {
+	                this.triggerMethod('valid', field);
+	            }
+	            
+	            let $el = utils.Html.query(this.el).removeClass('valid invalid');
+	            if (this.valid) $el.addClass('valid');
+	            else $el.addClass('invalid');
+	            
+	        }*/
+
 	    }, {
 	        key: 'onFormChange',
-	        value: function onFormChange(e) {
-	            var target = e.delegateTarget;
-	            var field = this.getFieldForElement(target);
-	            if (field == null) return;
-	            this.triggerMethod('change', field);
+	        value: function onFormChange(field) {
+	            this.trigger('change', field);
 	            field.validate(this);
 	            this.valid = this.fields.filter(function (e) {
 	                return !e.valid;
@@ -14793,69 +14856,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(base_1.BaseTemplate);
 
 	exports.Form = Form;
-
-/***/ },
-/* 90 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var editor_1 = __webpack_require__(1);
-	var stick_1 = __webpack_require__(83);
-	var validator_1 = __webpack_require__(84);
-
-	var Input = function (_editor_1$Editor) {
-	    _inherits(Input, _editor_1$Editor);
-
-	    function Input() {
-	        var _Object$getPrototypeO;
-
-	        _classCallCheck(this, Input);
-
-	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	            args[_key] = arguments[_key];
-	        }
-
-	        var _this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Input)).call.apply(_Object$getPrototypeO, [this].concat(args)));
-
-	        _this.nodeName = "INPUT";
-	        return _this;
-	    }
-
-	    _createClass(Input, [{
-	        key: 'initialize',
-	        value: function initialize() {
-	            var input = document.createElement('input');
-	            this.section.appendChild(input);
-	            this.el = input;
-	            for (var a in stick_1.utils.omit(this.attributes, [])) {
-	                this.el.setAttribute(a, this.attributes[a]);
-	            }
-	        }
-	    }, {
-	        key: 'getValue',
-	        value: function getValue() {
-	            return validator_1.getValue(this.el);
-	        }
-	    }, {
-	        key: 'setValue',
-	        value: function setValue(value) {
-	            validator_1.setValue(this.el, value);
-	        }
-	    }]);
-
-	    return Input;
-	}(editor_1.Editor);
-
-	exports.Input = Input;
 
 /***/ }
 /******/ ])

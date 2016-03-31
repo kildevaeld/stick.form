@@ -8,7 +8,8 @@ import {Form} from './form';
 import * as templ from './template';
 
 export abstract class Field extends BaseTemplate<HTMLDivElement> {
-    //tagName = "DIV";
+    nodeName = "DIV";
+    errorField: HTMLDivElement;
     get editor(): HTMLElement {
         let el = <HTMLElement>this.el.querySelector('[name]');
         let fields = this.subview.bindings.filter( b => b instanceof Editor);
@@ -50,7 +51,7 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
     
     
     initialize () {
-           
+        this._onElementChange = utils.bind(this._onElementChange, this);
         this.el = document.createElement('div');
 
         for (let a in utils.omit(this.attributes, [])) {
@@ -66,13 +67,34 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
 
         this.el.appendChild(this.subview.render());
         
-        let errorField = document.createElement('div');
-        utils.addClass(errorField, "help-block")
+        this.errorField = document.createElement('div');
+        utils.addClass(this.errorField, "help-block")
         
-        this.editor.parentNode.appendChild(errorField);
+        this.editor.parentNode.appendChild(this.errorField);
        
 
+        /*let elList = <NodeListOf<HTMLElement>>this.el.querySelectorAll('[name]');
+        
+        if (!elList || elList.length > 1) {
+            throw new Error('field with no input or more than one');
+        }
+        let el = elList[0];
+        
+        utils.addEventListener('change', )*/
+        
+        let el = <HTMLElement>this.el.querySelector('[name]');
+        let fields = this.subview.bindings.filter( b => b instanceof Editor);
+        let field = utils.find<Editor>(<any>fields, (i) => i.el === el)
+        
+        if (field) {
+            field.addEventListener('change', this._onElementChange);
+        } else {
+            utils.addEventListener(el, 'change', this._onElementChange);
+        }
+
     }
+    
+    
     
     clear () {
         this.value = null;
@@ -103,7 +125,7 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
         let el = utils.Html.query(this.el);
         el.removeClass('has-success has-error');
         
-        let help = el.find('.help-block');
+        let help = utils.Html.query(this.errorField);
         help.html('');
         if (errors.length === 0) {
             el.addClass('has-success');
@@ -137,6 +159,17 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
             
             this.valid = false;
         }
+    }
+    
+    private _onElementChange (e) {
+        this.trigger('change', this);
+    }
+    
+    destroy() {
+        if (this.el) {
+            utils.removeEventListener(this.el, 'change', this._onElementChange);
+        }
+        super.destroy();
     }
 
 }

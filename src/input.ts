@@ -15,6 +15,7 @@ export class Input extends Editor {
         }
         
     }
+    
     getValue(): string {
         return getValue(this.el);
         

@@ -4,7 +4,7 @@ import { Form } from './form';
 import { Field } from './field';
 export declare abstract class Editor extends Base {
     el: HTMLElement;
-    tagName: string;
+    nodeName: string;
     value: any;
     abstract getValue(): any;
     abstract setValue(value: any): any;

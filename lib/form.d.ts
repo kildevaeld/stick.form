@@ -8,7 +8,7 @@ export declare class Form extends BaseTemplate<HTMLFormElement> {
     initialize(): void;
     validate(): any[];
     getValue(): any;
-    onFormChange(e: any): void;
+    onFormChange(field: any): void;
     triggerMethod(event: string, ...args: any[]): void;
     update(): void;
     onContextChange(): void;

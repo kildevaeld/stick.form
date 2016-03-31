@@ -1,9 +1,11 @@
 import { BaseTemplate } from './base';
+import { Editor } from './editor';
 import { Form } from './form';
 export declare abstract class Field extends BaseTemplate<HTMLDivElement> {
     nodeName: string;
     errorField: HTMLDivElement;
-    editor: HTMLElement;
+    editor: Editor;
+    element: HTMLElement;
     name: string;
     value: any;
     valid: boolean;
@@ -13,5 +15,6 @@ export declare abstract class Field extends BaseTemplate<HTMLDivElement> {
     validate(form: Form): any;
     setErrors(errors: Error[]): void;
     private _onElementChange(e);
+    private _createHelpBlock();
     destroy(): void;
 }

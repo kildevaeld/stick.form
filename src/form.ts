@@ -15,7 +15,7 @@ export class Form extends BaseTemplate<HTMLFormElement> {
     }
     
     getFieldForElement (el:HTMLElement): Field {
-        return utils.find<Field>(this.fields, (i) => i.editor === el);
+        return utils.find<Field>(this.fields, (i) => i.element === el);
     }
     
     getFieldForName (name: string): Field {

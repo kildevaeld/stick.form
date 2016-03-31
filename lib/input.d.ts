@@ -4,4 +4,5 @@ export declare class Input extends Editor {
     initialize(): void;
     getValue(): string;
     setValue(value: string): void;
+    setHelpBlock(html: HTMLDivElement): void;
 }

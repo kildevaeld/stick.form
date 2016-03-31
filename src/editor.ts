@@ -17,6 +17,13 @@ export abstract class Editor extends Base {
     set value(value: any) {
         this.setValue(value);
     }
+    
+    get name (): string {
+        if (this.el) {
+            return this.el.getAttribute('name');
+        }
+        return this.attributes['name'];
+    }
 
     abstract getValue(): any;
     abstract setValue(value: any);
@@ -31,7 +38,9 @@ export abstract class Editor extends Base {
             //this.el.addEventListener(event, fn);
         }
     }
-
+    
+    abstract setHelpBlock(block:HTMLDivElement);
+    
     removeEventListener(event: string, fn) {
         if (this.el) {
             this.el.removeEventListener(event, fn);

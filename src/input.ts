@@ -25,4 +25,11 @@ export class Input extends Editor {
     setValue(value:string) {
         setValue(this.el, value);
     }
+    
+    setHelpBlock (html:HTMLDivElement) {
+        console.log('HELP BLOCK')
+       if (this.el.parentNode) {
+           this.el.parentNode.appendChild(html);
+       }
+    }
 }

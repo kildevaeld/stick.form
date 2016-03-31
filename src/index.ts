@@ -15,4 +15,4 @@ import {Input} from './input';
 
 stick.component('form',  Form);
 stick.component('field', Field);
-//stick.component('input', Input);
+stick.component('input', Input);

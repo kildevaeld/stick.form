@@ -10,40 +10,52 @@ import * as templ from './template';
 export abstract class Field extends BaseTemplate<HTMLDivElement> {
     nodeName = "DIV";
     errorField: HTMLDivElement;
-    get editor(): HTMLElement {
-        let el = <HTMLElement>this.el.querySelector('[name]');
-        let fields = this.subview.bindings.filter( b => b instanceof Editor);
-        let field = utils.find<Editor>(<any>fields, (i) => i.el === el)
+    get editor(): Editor {
         
+        let editors = <Editor[]>this.subview.bindings.filter( b => b instanceof Editor);
+        let editor: Editor;
+        
+        if (this.element) {
+            editor = utils.find<Editor>(editors, (i) => i.el === this.element);    
+        } else {
+            editor = editors.length > 0 ? editors[0]: undefined; 
+        }
+       
+        return editor;
+    }
+    
+    get element(): HTMLElement {
+        let el = <HTMLElement>this.el.querySelector('[name]');
         return el;
-    } 
+    }
     
     get name(): string {
-        return this.editor.getAttribute('name');
+        if (this.editor) {
+            return this.editor.name;
+        } else {
+            return this.element.getAttribute('name');
+        }
+        
     }
     
     get value(): any {
-        let el = <HTMLElement>this.el.querySelector('[name]');
-        let fields = this.subview.bindings.filter( b => b instanceof Editor);
-        let field = utils.find<Editor>(<any>fields, (i) => i.el === el)
-        
-        if (field) {
-            return field.value;
+       
+        if (this.editor) {
+            return this.editor.value;
         } else {
-            return getValue(el);
+            return getValue(this.element);
         }
         
     }
     
     set value(value:any) {
-        let el = <HTMLElement>this.el.querySelector('[name]');
-        let fields = this.subview.bindings.filter( b => b instanceof Editor);
-        let field = utils.find<Editor>(<any>fields, (i) => i.el === el)
         
-        if (field) {
-            field.value = value;
+        
+        
+        if (this.editor) {
+            this.editor.value = value;
         } else {
-            setValue(el, value);
+            setValue(this.element, value);
         }
     }
     
@@ -63,38 +75,20 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
         this.subview = <TemplateView>this.childTemplate.view(this.view.context, {
             parent: this.view
         });
-        
 
         this.el.appendChild(this.subview.render());
         
-        this.errorField = document.createElement('div');
-        utils.addClass(this.errorField, "help-block")
-        
-        this.editor.parentNode.appendChild(this.errorField);
-       
-
-        /*let elList = <NodeListOf<HTMLElement>>this.el.querySelectorAll('[name]');
-        
-        if (!elList || elList.length > 1) {
-            throw new Error('field with no input or more than one');
-        }
-        let el = elList[0];
-        
-        utils.addEventListener('change', )*/
-        
-        let el = <HTMLElement>this.el.querySelector('[name]');
-        let fields = this.subview.bindings.filter( b => b instanceof Editor);
-        let field = utils.find<Editor>(<any>fields, (i) => i.el === el)
-        
-        if (field) {
-            field.addEventListener('change', this._onElementChange);
+        if (this.editor) {
+            this.editor.addEventListener('change', this._onElementChange);
+        } else if (this.element) {
+            utils.addEventListener(this.element, 'change', this._onElementChange);
         } else {
-            utils.addEventListener(el, 'change', this._onElementChange);
+            throw new Error('field has no editor');
         }
+        
+        this._createHelpBlock();
 
     }
-    
-    
     
     clear () {
         this.value = null;
@@ -104,16 +98,13 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
     
     
     validate (form:Form) {
-        let el = <HTMLElement>this.el.querySelector('[name]');
-        let fields = this.subview.bindings.filter( b => b instanceof Editor);
-        let field = utils.find<Editor>(<any>fields, (i) => i.el === el)
-       
+        
         
         let errors;
-        if (field) {
-            errors = field.validate(form, this);
+        if (this.editor) {
+            errors = this.editor.validate(form, this);
         } else {
-            errors = validate(form, this, el);
+            errors = validate(form, this, this.element);
         }
         
         this.setErrors(errors);
@@ -134,7 +125,9 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
         } else {
             el.addClass('has-error')
             
-            let eStr = this.editor.getAttribute('error');
+            let elm: any = this.editor||this.element;
+            
+            let eStr = elm.getAttribute('error');
             let s: string[];
             if (eStr) {
                 let str = templ.template(eStr, {
@@ -165,8 +158,28 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
         this.trigger('change', this);
     }
     
+    private _createHelpBlock () {
+        
+        let helpBlock = document.createElement('div');
+        utils.addClass(helpBlock, 'help-block');
+        
+        this.errorField = helpBlock;
+        
+        if (this.editor) {
+            this.editor.setHelpBlock(helpBlock);
+        } else {
+            if (this.element.parentNode) {
+                this.element.parentNode.appendChild(helpBlock);
+            } else {
+                this.el.appendChild(helpBlock);
+            }
+        }
+    }
+    
     destroy() {
-        if (this.el) {
+        if (this.editor) {
+            this.editor.off();
+        } else if (this.element) {
             utils.removeEventListener(this.el, 'change', this._onElementChange);
         }
         super.destroy();

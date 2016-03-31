@@ -8,7 +8,7 @@ import {Field} from './field';
 export abstract class Editor extends Base {
 
     el: HTMLElement;
-    tagName: string;
+    nodeName: string;
 
     get value(): any {
         return this.getValue();

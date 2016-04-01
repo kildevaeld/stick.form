@@ -48,6 +48,12 @@ export class Form extends BaseTemplate<HTMLFormElement> {
         this.fields.forEach(e => {
             this.listenTo(e, 'change', this.onFormChange);
         })
+        
+        utils.addEventListener(this.el, 'submit', (e) => {
+            console.log('submit')
+            e.preventDefault();
+            return false;
+        });
       
         this.listenTo(this.subview.context,'change', this.onContextChange);
     }

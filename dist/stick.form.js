@@ -14767,6 +14767,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.fields.forEach(function (e) {
 	                _this2.listenTo(e, 'change', _this2.onFormChange);
 	            });
+	            stick_1.utils.addEventListener(this.el, 'submit', function (e) {
+	                console.log('submit');
+	                e.preventDefault();
+	                return false;
+	            });
 	            this.listenTo(this.subview.context, 'change', this.onContextChange);
 	        }
 	    }, {

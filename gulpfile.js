@@ -33,7 +33,8 @@ gulp.task('default', ['typescript'], () => {
             filename: 'stick.form.js'
         },
         externals: {
-            "stick": 'stick'
+            "stick": 'stick',
+            'stick/lib/template': 'stick' 
         }
     }))
     .pipe(gulp.dest('dist'))

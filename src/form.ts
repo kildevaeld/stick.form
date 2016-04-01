@@ -6,7 +6,7 @@ import {TemplateView, Assignment, Call} from 'stick/lib/template';
 
 export class Form extends BaseTemplate<HTMLFormElement> {
     
-    //nodeName = "FORM";
+    nodeName = "FORM";
     
     valid: boolean = true;
     
@@ -22,8 +22,7 @@ export class Form extends BaseTemplate<HTMLFormElement> {
         return utils.find<Field>(this.fields, (i) => i.name === name);   
     }
     
-    
-    
+
     initialize () {
         
         this.el = document.createElement('form');
@@ -45,15 +44,10 @@ export class Form extends BaseTemplate<HTMLFormElement> {
         });
 
         this.el.appendChild(this.subview.render());
-
-        //let fields = this.el.querySelectorAll('[name]');
-        
-        let fields = this.fields;
-        
-        fields.forEach(e => {
+     
+        this.fields.forEach(e => {
             this.listenTo(e, 'change', this.onFormChange);
         })
-        //utils.delegate(this.el, '[name]', 'change', this.onFormChange, this);
       
         this.listenTo(this.subview.context,'change', this.onContextChange);
     }
@@ -86,31 +80,6 @@ export class Form extends BaseTemplate<HTMLFormElement> {
         }
         return out;
     }
-    
-    /*onFormChange (e) {
-        let target = e.delegateTarget;
-        
-        let field = this.getFieldForElement(target);
-        
-        if (field == null) return;
-        
-        this.triggerMethod('change', field);
-        
-        field.validate(this);
-      
-        this.valid = this.fields.filter( e => !e.valid ).length === 0;
-        
-        if (!this.valid) {
-            this.triggerMethod('invalid', field);
-        } else {
-            this.triggerMethod('valid', field);
-        }
-        
-        let $el = utils.Html.query(this.el).removeClass('valid invalid');
-        if (this.valid) $el.addClass('valid');
-        else $el.addClass('invalid');
-        
-    }*/
     
     onFormChange (field) {
         

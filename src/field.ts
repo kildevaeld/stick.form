@@ -10,6 +10,10 @@ import * as templ from './template';
 export abstract class Field extends BaseTemplate<HTMLDivElement> {
     nodeName = "DIV";
     errorField: HTMLDivElement;
+    
+    /**
+     * If the containing element is custom element and inherits from Editor
+     */
     get editor(): Editor {
         
         let editors = <Editor[]>this.subview.bindings.filter( b => b instanceof Editor);
@@ -34,8 +38,7 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
             return this.editor.name;
         } else {
             return this.element.getAttribute('name');
-        }
-        
+        } 
     }
     
     get value(): any {
@@ -49,9 +52,7 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
     }
     
     set value(value:any) {
-        
-        
-        
+ 
         if (this.editor) {
             this.editor.value = value;
         } else {
@@ -63,9 +64,11 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
     
     
     initialize () {
+        
         this._onElementChange = utils.bind(this._onElementChange, this);
+        
+        
         this.el = document.createElement('div');
-
         for (let a in utils.omit(this.attributes, [])) {
             this.el.setAttribute(a, this.attributes[a]);
         }
@@ -98,7 +101,6 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
     
     
     validate (form:Form) {
-        
         
         let errors;
         if (this.editor) {

@@ -3,8 +3,6 @@ import {template} from 'stick';
 import {BaseComponent, TemplateView} from 'stick/lib/template';
 
 export abstract class Base extends BaseComponent {
-    
-    
      destroy () {
         this.stopListening();
         super.destroy();

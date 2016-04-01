@@ -27,26 +27,23 @@ export abstract class Editor extends Base {
 
     abstract getValue(): any;
     abstract setValue(value: any);
+    abstract setHelpBlock(block:HTMLDivElement);
 
     update() { }
 
     addEventListener(event: string, fn: any) {
-        
         if (this.el) {
-            //console.log('adde evetn', event)
             utils.addEventListener(this.el, event, fn);
-            //this.el.addEventListener(event, fn);
         }
     }
-    
-    abstract setHelpBlock(block:HTMLDivElement);
     
     removeEventListener(event: string, fn) {
         if (this.el) {
-            this.el.removeEventListener(event, fn);
+            utils.removeEventListener(this.el, event, fn);
         }
     }
-    
+  
+   
     validate (form:Form, field: Field): ValidateError[] {
         return this.el != null ? validate(form, field, this.el): [];
     }

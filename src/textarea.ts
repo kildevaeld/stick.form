@@ -4,7 +4,7 @@ import {utils} from 'stick'
 import {getValue, setValue} from './validator';
 
 
-export class Input extends Editor {
+export class Textarea extends Editor {
     nodeName = "INPUT"
     
     initialize () {

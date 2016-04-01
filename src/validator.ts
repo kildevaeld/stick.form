@@ -1,4 +1,4 @@
-declare const require:any;
+declare const require: any;
 import {template} from './template';
 import {Field} from './field';
 import {Form} from './form';
@@ -10,6 +10,8 @@ function get_validations(el: HTMLElement) {
     var required;
 
     let v = Object.keys(validators).map(e => {
+        // The required validator is getting handled elsewhere
+        if (e === 'required') return null;
         let i = el.getAttribute(e);
         if (i) return [validators[e], i, e];
         return null;
@@ -69,19 +71,31 @@ export function getValue(el: HTMLElement, value?: any): any {
     }
 }
 
-export function setValue(el:HTMLElement, value:any) {
+export function setValue(el: HTMLElement, value: any) {
     getValue(el, value);
 }
 
 export function validate(form: Form, field: Field, el: HTMLElement) {
 
-    let v = get_validations(el);
-    let name = el.getAttribute('name');
+    let v = get_validations(el),
+        name = el.getAttribute('name'),
+        required = el.getAttribute('required'),
+        value = getValue(el),
+        errors = [];
 
+    if (required) {
+        if (!validators.required(name, form, value, null)) {
+            return [new ValidateError(template(messages.required, {
+                name: name,
+                value: value,
+                arg: null
+            }))];
+        }
+    } else if (value == null || value == "") {
+        // Do not run validations, when the value is empty
+        return [];
+    }
 
-    let value = getValue(el);
-
-    let errors = [];
     for (let i = 0, ii = v.length; i < ii; i++) {
         if (!v[i][0](name, form, value, v[i][1])) {
             let vName = v[i][2];
@@ -114,17 +128,14 @@ export module validators {
     export function min(name: string, form: Form, value: any, arg: any) {
 
         let min = parseInt(arg);
-
         // TODO: check in init
         if (isNaN(min)) return;
 
         if (typeof value === 'string') {
             return value.length >= min;
         } else {
-
             return value >= min;
         }
-
     }
 
     export function match(name: string, form: Form, value: any, arg: any) {
@@ -140,7 +151,7 @@ export module validators {
         return utils.equal(value, oval);
 
     }
-    
+
     export function url(name: string, form: Form, value: any, arg: any) {
         return validURL.isUri(value);
     }

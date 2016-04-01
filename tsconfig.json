@@ -17,9 +17,10 @@
         "src/editor.ts",
         "src/field.ts",
         "src/form.ts",
-        "src/input.ts",
         "src/validator.ts",
-        "src/template.ts"
+        "src/template.ts",
+        "src/input.ts",
+        "src/textarea.ts"
         
     ]
 }

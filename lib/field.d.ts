@@ -4,6 +4,9 @@ import { Form } from './form';
 export declare abstract class Field extends BaseTemplate<HTMLDivElement> {
     nodeName: string;
     errorField: HTMLDivElement;
+    /**
+     * If the containing element is custom element and inherits from Editor
+     */
     editor: Editor;
     element: HTMLElement;
     name: string;

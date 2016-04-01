@@ -9,9 +9,9 @@ export declare abstract class Editor extends Base {
     name: string;
     abstract getValue(): any;
     abstract setValue(value: any): any;
+    abstract setHelpBlock(block: HTMLDivElement): any;
     update(): void;
     addEventListener(event: string, fn: any): void;
-    abstract setHelpBlock(block: HTMLDivElement): any;
     removeEventListener(event: string, fn: any): void;
     validate(form: Form, field: Field): ValidateError[];
 }

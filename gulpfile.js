@@ -34,7 +34,7 @@ gulp.task('default', ['typescript'], () => {
         },
         externals: {
             "stick": 'stick',
-            'stick/lib/template': 'stick' 
+            //'stick/lib/template': 'stick' 
         }
     }))
     .pipe(gulp.dest('dist'))

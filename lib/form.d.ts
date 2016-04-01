@@ -1,6 +1,7 @@
 import { BaseTemplate } from './base';
 import { Field } from './field';
 export declare class Form extends BaseTemplate<HTMLFormElement> {
+    nodeName: string;
     valid: boolean;
     fields: Field[];
     getFieldForElement(el: HTMLElement): Field;

@@ -16,16 +16,14 @@
     "gulp-rename": "^1.2.2",
     "gulp-typescript": "^2.12.1",
     "gulp-webpack": "^1.5.0",
-    "stick": "git+https://github.com/kildevaeld/stickjs.git"
-    
+    "stick": "git+https://github.com/kildevaeld/stickjs.git",
+    "merge2": "^1.0.1"
   },
   "peerDependencies": {
     "stick": "git+https://github.com/kildevaeld/stickjs.git"
   },
   "typings": "lib/index",
   "dependencies": {
-    "merge2": "^1.0.1",
-    "micro-template": "^0.1.2",
     "valid-url": "^1.0.9"
   }
 }

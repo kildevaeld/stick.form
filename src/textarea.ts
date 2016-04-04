@@ -6,101 +6,45 @@ import {getValue, setValue} from './validator';
 
 var createEvent = (name) => new Event(name);
 try {
-	new Event('test');
-} catch(e) {
-	// IE does not support `new Event()`
-	createEvent = (name)=> {
-		const evt = document.createEvent('Event');
-		evt.initEvent(name, true, false);
-		return evt;
-	};
+    new Event('test');
+} catch (e) {
+    // IE does not support `new Event()`
+    createEvent = (name) => {
+        const evt = document.createEvent('Event');
+        evt.initEvent(name, true, false);
+        return evt;
+    };
 }
 
-export class Textarea extends Editor {
-    nodeName = "TEXTAREA"
-
-    private _autoSize: boolean
-    private _overflowY: string;
+export class AutoSizer {
     private _state: {
         overflowY: string;
         heightOffset: number;
         clientWidth: number;
     }
 
-    initialize() {
+    constructor(public el: HTMLElement) {
         this._onChange = utils.bind(this._onChange, this);
         this._onPageResize = utils.bind(this._onPageResize, this);
-        
-        
-        let input = document.createElement('textarea');
-        this.section.appendChild(input);
-        this.el = input;
-        this._autoSize = false;
-        
-        
+        this._initInitialSize();
     }
-    
-    _onPageResize ()  {
-		if (this.el.clientWidth !== this._state.clientWidth) {
-			this._updateSize();
-		}
-	}
 
-    update() {
-        for (let a in utils.omit(this.attributes, [])) {
-            this.el.setAttribute(a, this.attributes[a]);
-        }
-
-        if (this.attributes['autosize'] && !this._autoSize) {
-            if (!this._autoSize) {
-                utils.addEventListener(this.el, 'keyup', this._onChange);
-                utils.addEventListener(this.el, 'input', this._onChange);
-                utils.addEventListener(<any>window, 'resize', this._onPageResize);
-            }
-            
-            this._autoSize = true;
-            
-            //if (setOverflowX) {
-		        this.el.style.overflowX = 'hidden';
-		        this.el.style.wordWrap = 'break-word';
-	        //}
-            
-            (<HTMLTextAreaElement>this.el).rows = 1;
-            
-            this._initInitialSize();
-
-        } else if (!this.attributes['autosize'] && this._autoSize) {
-            utils.removeEventListener(this.el, 'keyup', this._onChange);
-            utils.removeEventListener(this.el, 'input', this._onChange);
-            utils.removeEventListener(<any>window, 'resize', this._onPageResize);
+    _onPageResize() {
+        if (this.el.clientWidth !== this._state.clientWidth) {
+            this._updateSize();
         }
     }
 
-    getValue(): string {
-        return getValue(this.el);
-    }
-
-    setValue(value: string) {
-        setValue(this.el, value);
-    }
-
-    _onChange(e) {
+    _onChange() {
         this._updateSize();
-    }
-
-    setHelpBlock(html: HTMLDivElement) {
-        if (this.el.parentNode) {
-            this.el.parentNode.appendChild(html);
-        }
     }
 
     _initInitialSize() {
         const style = window.getComputedStyle(this.el, null);
 
-        this._overflowY = style.overflowY;
         let heightOffset: number;
-        
-        
+
+
         if ((<any>style).resize === 'vertical') {
             (<any>this.el).style.resize = 'none';
         } else if ((<any>style).resize === 'both') {
@@ -122,6 +66,10 @@ export class Textarea extends Editor {
             heightOffset: heightOffset,
             clientWidth: this.el.clientWidth
         };
+
+        utils.addEventListener(this.el, 'keyup', this._onChange);
+        utils.addEventListener(this.el, 'input', this._onChange);
+        utils.addEventListener(<any>window, 'resize', this._onPageResize);
 
         this._updateSize();
 
@@ -147,7 +95,7 @@ export class Textarea extends Editor {
         this._state.overflowY = value;
 
         ///*if (setOverflowY) {
-            this.el.style.overflowY = value;
+        this.el.style.overflowY = value;
         //}*/
 
         this._resize();
@@ -178,6 +126,10 @@ export class Textarea extends Editor {
         document.body.scrollTop = bodyTop;
     }
 
+    update () {
+        this._updateSize();
+    }
+
     _updateSize() {
         const startHeight = this.el.style.height;
 
@@ -186,11 +138,11 @@ export class Textarea extends Editor {
         const style = window.getComputedStyle(this.el, null);
 
         if (style.height !== this.el.style.height) {
-            if (this._overflowY !== 'visible') {
+            if (this._state.overflowY !== 'visible') {
                 this._changeOverflow('visible');
             }
         } else {
-            if (this._overflowY !== 'hidden') {
+            if (this._state.overflowY !== 'hidden') {
                 this._changeOverflow('hidden');
             }
         }
@@ -202,10 +154,90 @@ export class Textarea extends Editor {
     }
 
     destroy() {
+        utils.removeEventListener(this.el, 'keyup', this._onChange);
+        utils.removeEventListener(this.el, 'input', this._onChange);
+        utils.removeEventListener(<any>window, 'resize', this._onPageResize);
+    }
+}
+
+export class Textarea extends Editor {
+    nodeName = "TEXTAREA"
+    private _autoSizer: AutoSizer;
+    private _autoSize: boolean
+    private _overflowY: string;
+    private _state: {
+        overflowY: string;
+        heightOffset: number;
+        clientWidth: number;
+    }
+
+    initialize() {
+        this._onChange = utils.bind(this._onChange, this);
+        //this._onPageResize = utils.bind(this._onPageResize, this);
+
+
+        let input = document.createElement('textarea');
+        this.section.appendChild(input);
+        this.el = input;
+        this._autoSize = false;
+
+
+    }
+
+  
+    update() {
+        for (let a in utils.omit(this.attributes, [])) {
+            this.el.setAttribute(a, this.attributes[a]);
+        }
+
+        if (this.attributes['autosize'] && !this._autoSize) {
+            if (!this._autoSize) {
+                this._autoSizer = new AutoSizer(this.el);
+            }
+
+            this._autoSize = true;
+
+            //if (setOverflowX) {
+            this.el.style.overflowX = 'hidden';
+            this.el.style.wordWrap = 'break-word';
+            //}
+
+            (<HTMLTextAreaElement>this.el).rows = 1;
+
+            //this._initInitialSize();
+
+        } else if (!this.attributes['autosize'] && this._autoSize) {
+            
+            this._autoSizer.destroy();
+            this._autoSizer = void 0;
+        }
+    }
+
+    getValue(): string {
+        return getValue(this.el);
+    }
+
+    setValue(value: string) {
+        setValue(this.el, value);
+        if (this._autoSizer) this._autoSizer.update();
+        //this._updateSize();
+    }
+
+    _onChange(e) {
+        //this._updateSize();
+    }
+
+    setHelpBlock(html: HTMLDivElement) {
+        if (this.el.parentNode) {
+            this.el.parentNode.appendChild(html);
+        }
+    }
+
+    
+
+    destroy() {
         if (this._autoSize) {
-            utils.removeEventListener(this.el, 'keyup', this._onChange);
-            utils.removeEventListener(this.el, 'input', this._onChange);
-            utils.removeEventListener(<any>window, 'resize', this._onPageResize);
+            this._autoSizer.destroy();
         }
         super.destroy();
     }

@@ -49,13 +49,14 @@ export class Form extends BaseTemplate<HTMLFormElement> {
             this.listenTo(e, 'change', this.onFormChange);
         })
         
-        utils.addEventListener(this.el, 'submit', (e) => {
-            console.log('submit')
-            e.preventDefault();
-            return false;
-        });
+        utils.addEventListener(this.el, 'submit', this._onSubmit);
       
         this.listenTo(this.subview.context,'change', this.onContextChange);
+    }
+
+   private  _onSubmit (e) {
+        e.preventDefault();
+        return false;
     }
     
     validate () {
@@ -131,8 +132,12 @@ export class Form extends BaseTemplate<HTMLFormElement> {
     }
     
     destroy() {
-        utils.undelegate(this.el, '[name]', 'change', this.onFormChange);
-        this.subview.destroy();
+        utils.removeEventListener(this.el, 'submit', this._onSubmit);
+        if (this.subview) {
+            this.subview.$destroy();
+            this.subview = void 0;
+        }
+        
         super.destroy()
     }
    

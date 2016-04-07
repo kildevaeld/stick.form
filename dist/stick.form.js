@@ -15221,12 +15221,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.fields.forEach(function (e) {
 	                _this2.listenTo(e, 'change', _this2.onFormChange);
 	            });
-	            stick_1.utils.addEventListener(this.el, 'submit', function (e) {
-	                console.log('submit');
-	                e.preventDefault();
-	                return false;
-	            });
+	            stick_1.utils.addEventListener(this.el, 'submit', this._onSubmit);
 	            this.listenTo(this.subview.context, 'change', this.onContextChange);
+	        }
+	    }, {
+	        key: '_onSubmit',
+	        value: function _onSubmit(e) {
+	            e.preventDefault();
+	            return false;
 	        }
 	    }, {
 	        key: 'validate',
@@ -15298,8 +15300,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'destroy',
 	        value: function destroy() {
-	            stick_1.utils.undelegate(this.el, '[name]', 'change', this.onFormChange);
-	            this.subview.destroy();
+	            stick_1.utils.removeEventListener(this.el, 'submit', this._onSubmit);
+	            if (this.subview) {
+	                this.subview.$destroy();
+	                this.subview = void 0;
+	            }
 	            _get(Object.getPrototypeOf(Form.prototype), 'destroy', this).call(this);
 	        }
 	    }, {

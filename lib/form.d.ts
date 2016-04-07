@@ -7,6 +7,7 @@ export declare class Form extends BaseTemplate<HTMLFormElement> {
     getFieldForElement(el: HTMLElement): Field;
     getFieldForName(name: string): Field;
     initialize(): void;
+    private _onSubmit(e);
     validate(): any[];
     getValue(): any;
     onFormChange(field: any): void;

@@ -184,6 +184,11 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
         } else if (this.element) {
             utils.removeEventListener(this.el, 'change', this._onElementChange);
         }
+
+        if (this.subview) {
+            this.subview.$destroy();
+        }
+
         super.destroy();
     }
 

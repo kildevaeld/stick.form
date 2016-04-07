@@ -15084,6 +15084,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else if (this.element) {
 	                stick_1.utils.removeEventListener(this.el, 'change', this._onElementChange);
 	            }
+	            if (this.subview) {
+	                this.subview.$destroy();
+	            }
 	            _get(Object.getPrototypeOf(Field.prototype), 'destroy', this).call(this);
 	        }
 	    }, {

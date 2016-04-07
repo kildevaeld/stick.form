@@ -132,6 +132,7 @@ export class Form extends BaseTemplate<HTMLFormElement> {
     
     destroy() {
         utils.undelegate(this.el, '[name]', 'change', this.onFormChange);
+        this.subview.destroy();
         super.destroy()
     }
    

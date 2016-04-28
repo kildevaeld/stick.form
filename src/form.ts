@@ -4,8 +4,7 @@ import {Field} from './field';
 import {TemplateView, Assignment, Call} from 'stick/lib/template';
 
 
-export class Form extends BaseTemplate<HTMLFormElement> {
-    
+export class Form extends BaseTemplate<HTMLFormElement> {  
     nodeName = "FORM";
     
     valid: boolean = true;
@@ -86,6 +85,18 @@ export class Form extends BaseTemplate<HTMLFormElement> {
             out[fields[i].name] = fields[i].value;
         }
         return out;
+    }
+    
+    setValue(obj:any) {
+        let fields = this.fields;
+        for (let i = 0, ii = fields.length; i < ii; i++) {
+            if (obj == null) fields[i].value = null;
+            else {
+                if (utils.has(obj, fields[i].name)) {
+                    fields[i].value = obj[fields[i].name];
+                }
+            }
+        }
     }
     
     onFormChange (field) {

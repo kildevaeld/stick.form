@@ -10,6 +10,7 @@ export declare class Form extends BaseTemplate<HTMLFormElement> {
     private _onSubmit(e);
     validate(): any[];
     getValue(): any;
+    setValue(obj: any): void;
     onFormChange(field: any): void;
     triggerMethod(event: string, ...args: any[]): void;
     update(): void;

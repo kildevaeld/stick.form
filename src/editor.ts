@@ -25,9 +25,9 @@ export abstract class Editor extends Base {
         return this.attributes['name'];
     }
 
-    abstract getValue(): any;
-    abstract setValue(value: any);
-    abstract setHelpBlock(block:HTMLDivElement);
+    protected abstract getValue(): any;
+    protected abstract setValue(value: any);
+    protected abstract setHelpBlock(block:HTMLDivElement);
 
     update() { }
 

@@ -38,8 +38,6 @@
             let app = stick.module('app', ['$state', function ($state) {
                 $state.set('name', 'Peter');
                 
-
-                
                 this.onSubmit = function () {
                     var valid  = $state.get('$ui.form').validate()
                     

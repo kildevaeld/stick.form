@@ -7,9 +7,9 @@ export declare abstract class Editor extends Base {
     nodeName: string;
     value: any;
     name: string;
-    abstract getValue(): any;
-    abstract setValue(value: any): any;
-    abstract setHelpBlock(block: HTMLDivElement): any;
+    protected abstract getValue(): any;
+    protected abstract setValue(value: any): any;
+    protected abstract setHelpBlock(block: HTMLDivElement): any;
     update(): void;
     addEventListener(event: string, fn: any): void;
     removeEventListener(event: string, fn: any): void;

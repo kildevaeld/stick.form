@@ -24,6 +24,10 @@
   },
   "typings": "lib/index",
   "dependencies": {
+    "babel-polyfill": "^6.13.0",
+    "babel-preset-es2015": "^6.13.2",
+    "gulp-typescript": "^2.13.6",
+    "stick": "git+https://github.com/kildevaeld/stickjs.git",
     "valid-url": "^1.0.9"
   }
 }

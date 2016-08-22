@@ -9,7 +9,6 @@ export abstract class Base extends BaseComponent {
     }
 }
 
-
 export abstract class BaseTemplate<T extends HTMLElement> extends Base {
     subview: TemplateView;
     el: T;

@@ -6,6 +6,7 @@ export declare function validate(form: Form, field: Field, el: HTMLElement): any
 export declare module validators {
     function required(name: string, form: Form, value: any, arg: any): boolean;
     function min(name: string, form: Form, value: any, arg: any): boolean;
+    function max(name: string, form: Form, value: any, arg: any): boolean;
     function match(name: string, form: Form, value: any, arg: any): boolean;
     function url(name: string, form: Form, value: any, arg: any): any;
     function email(name: string, form: Form, value: any, arg: any): boolean;

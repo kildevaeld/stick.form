@@ -179,38 +179,33 @@ export class Textarea extends Editor {
         let input = document.createElement('textarea');
         this.section.appendChild(input);
         this.el = input;
-        this._autoSize = false;
-
+        
 
     }
 
   
     update() {
-        for (let a in utils.omit(this.attributes, [])) {
+        for (let a in utils.omit(this.attributes, ['autosize'])) {
             this.el.setAttribute(a, this.attributes[a]);
         }
 
-        if (this.attributes['autosize'] && !this._autoSize) {
-            if (!this._autoSize) {
+        let autoSize = this.attributes['autosize'];
+        
+        if (autoSize) {
+            if (this._autoSizer == null) {
                 this._autoSizer = new AutoSizer(this.el);
+                this.el.style.overflowX = 'hidden';
+                this.el.style.wordWrap = 'break-word';
+                (<HTMLTextAreaElement>this.el).rows = 1;
             }
-
-            this._autoSize = true;
-
-            //if (setOverflowX) {
-            this.el.style.overflowX = 'hidden';
-            this.el.style.wordWrap = 'break-word';
-            //}
-
-            (<HTMLTextAreaElement>this.el).rows = 1;
-
-            //this._initInitialSize();
-
-        } else if (!this.attributes['autosize'] && this._autoSize) {
+        } else {
+            if (this._autoSize) {
+                this._autoSizer.destroy();
+                this._autoSizer = void 0;    
+            }
             
-            this._autoSizer.destroy();
-            this._autoSizer = void 0;
         }
+
     }
 
     getValue(): string {
@@ -218,6 +213,8 @@ export class Textarea extends Editor {
     }
 
     setValue(value: string) {
+        console.log('this', this.value, value)
+        if (this.value === value) return;
         setValue(this.el, value);
         if (this._autoSizer) this._autoSizer.update();
         //this._updateSize();

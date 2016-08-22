@@ -10,6 +10,7 @@ export declare abstract class Field extends BaseTemplate<HTMLDivElement> {
     editor: Editor;
     element: HTMLElement;
     name: string;
+    label: string;
     value: any;
     valid: boolean;
     initialize(): void;

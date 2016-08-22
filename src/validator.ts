@@ -12,13 +12,12 @@ function get_validations(el: HTMLElement) {
     let v = Object.keys(validators).map(e => {
         // The required validator is getting handled elsewhere
         if (e === 'required') return null;
-        let i = el.getAttribute(e);
+        let i = el.getAttribute('validate-' + e);
         if (i) return [validators[e], i, e];
         return null;
     }).filter(e => e !== null);
-
+    
     return v;
-
 }
 
 export function getValue(el: HTMLElement, value?: any): any {
@@ -78,8 +77,8 @@ export function setValue(el: HTMLElement, value: any) {
 export function validate(form: Form, field: Field, el: HTMLElement) {
 
     let v = get_validations(el),
-        name = el.getAttribute('name'),
-        required = el.getAttribute('required'),
+        name = field.name,//el.getAttribute('name'),
+        required = el.getAttribute('required')||el.getAttribute('validate-required'),
         value = getValue(el),
         errors = [];
 
@@ -87,6 +86,7 @@ export function validate(form: Form, field: Field, el: HTMLElement) {
         if (!validators.required(name, form, value, null)) {
             return [new ValidateError(template(messages.required, {
                 name: name,
+                label: field.label||name,
                 value: value,
                 arg: null
             }))];
@@ -102,6 +102,7 @@ export function validate(form: Form, field: Field, el: HTMLElement) {
             let e = new ValidateError(template(messages[vName], {
                 name: name,
                 value: value,
+                label: field.label||name,
                 arg: v[i][1]
             }));
             errors.push(e);
@@ -112,12 +113,12 @@ export function validate(form: Form, field: Field, el: HTMLElement) {
 }
 
 module messages {
-    export const required = "<b><% name %></b> is required";
-    export const min = "<b><% name %></b> needs to be minimum <% arg %> long";
-
-    export const email = "<b><% name %></b> is not an email";
-    export const url = "<b><% name %></b> is not an url";
-    export const match = "<b><% name %></b> does not match: <b><%arg%></b>"
+    export const required = "<b><% label %></b> is required";
+    export const min = "<b><% label %></b> needs to be minimum <% arg %>";
+    export const max = "<b><% label %></b> needs to be maximum <% arg %>"
+    export const email = "<b><% label %></b> is not an email";
+    export const url = "<b><% label %></b> is not an url";
+    export const match = "<b><% label %></b> does not match: <b><%arg%></b>"
 }
 
 export module validators {
@@ -133,9 +134,25 @@ export module validators {
 
         if (typeof value === 'string') {
             return value.length >= min;
-        } else {
-            return value >= min;
+        } else if (Array.isArray(value)) {
+            return value.length >= min;
+        } else  {
+            return parseInt(value) >= min;
         }
+    }
+
+    export function max(name: string, form: Form, value: any, arg: any) {
+         let max = parseInt(arg);
+        // TODO: check in init
+        if (isNaN(max)) return;
+
+        if (typeof value === 'string') {
+            return value.length <= max;
+        } else if (Array.isArray(value)) {
+            return value.length <= max;
+        } else  {
+            return parseInt(value) <= max;
+        }   
     }
 
     export function match(name: string, form: Form, value: any, arg: any) {

@@ -40,6 +40,13 @@ export abstract class Field extends BaseTemplate<HTMLDivElement> {
             return this.element.getAttribute('name');
         } 
     }
+
+    get label(): string {
+         let label = this.el.querySelector('.field-label');
+         if (label)
+             return label.textContent;
+        return null;
+    }
     
     get value(): any {
        
